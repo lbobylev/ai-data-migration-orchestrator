@@ -1,0 +1,2238 @@
+{
+    "meta": {
+        "columns": [
+            {
+                "name": "Component Type Code"
+            },
+            {
+                "name": "Component Type Description"
+            },
+            {
+                "name": "Catalogue Object Type Code"
+            },
+            {
+                "name": "Catalogue Object Type Description"
+            },
+            {
+                "name": "Catalogue Component Code"
+            },
+            {
+                "name": "Catalogue Component Description"
+            },
+            {
+                "name": "Customized (Yes/No)"
+            },
+            {
+                "name": "Color Code"
+            },
+            {
+                "name": "Color Description"
+            },
+            {
+                "name": "Component Family Code"
+            },
+            {
+                "name": "Brand Code"
+            },
+            {
+                "name": "Brand Description"
+            },
+            {
+                "name": "Upload Date"
+            },
+            {
+                "name": "MOQ Type Indicator Code"
+            },
+            {
+                "name": "MOQ Type Indicator Description"
+            },
+            {
+                "name": "Production MOQ"
+            },
+            {
+                "name": "Production MOQ UOM"
+            },
+            {
+                "name": "Min LT (weeks)"
+            },
+            {
+                "name": "Max LT (weeks)"
+            },
+            {
+                "name": "Made In Code"
+            },
+            {
+                "name": "Made In Description"
+            },
+            {
+                "name": "Technical Drawing"
+            },
+            {
+                "name": "Last Tech Drawing Uploaded Date"
+            },
+            {
+                "name": "Component/Raw Material Certification"
+            },
+            {
+                "name": "Missing Mandatory Certification 1 Code"
+            },
+            {
+                "name": "Missing Mandatory Certification 1 Description"
+            },
+            {
+                "name": "Missing Mandatory Certification 2 Code"
+            },
+            {
+                "name": "Missing Mandatory Certification 2 Description"
+            },
+            {
+                "name": "Missing Mandatory Certification 3 Code"
+            },
+            {
+                "name": "Missing Mandatory Certification 3 Description"
+            },
+            {
+                "name": "Missing Mandatory Certification 4 Code"
+            },
+            {
+                "name": "Missing Mandatory Certification 4 Description"
+            },
+            {
+                "name": "Missing Mandatory Certification 5 Code"
+            },
+            {
+                "name": "Missing Mandatory Certification 5 Description"
+            },
+            {
+                "name": "${component.componentTable.lastComponentCertificate}"
+            },
+            {
+                "name": "Player Certification"
+            },
+            {
+                "name": "Last Player Certification Uploaded Date"
+            },
+            {
+                "name": "Catalogue Weight [gr]"
+            },
+            {
+                "name": "Catalogue Qty for Weight"
+            },
+            {
+                "name": "Catalogue UOM for Weight"
+            },
+            {
+                "name": "Biobased (Yes/No)"
+            },
+            {
+                "name": "% Biobased"
+            },
+            {
+                "name": "Recycled (Yes/No)"
+            },
+            {
+                "name": "% Recycled"
+            },
+            {
+                "name": "Multimaterial (Yes/No)"
+            },
+            {
+                "name": "Base Material KEYE Code"
+            },
+            {
+                "name": "Base Material KEYE Description"
+            },
+            {
+                "name": "Material Family KEYE Code"
+            },
+            {
+                "name": "Material Family KEYE Description"
+            },
+            {
+                "name": "Material Family Vendor Code"
+            },
+            {
+                "name": "Material Family Vendor Description"
+            },
+            {
+                "name": "Base Material Vendor Code"
+            },
+            {
+                "name": "Base Material Vendor Description"
+            },
+            {
+                "name": "Material Country of Origin Code"
+            },
+            {
+                "name": "Material Country of Origin Description"
+            },
+            {
+                "name": "Raw Material Provenance Code"
+            },
+            {
+                "name": "Raw Material Provenance Description"
+            },
+            {
+                "name": "${component.componentTable.functionalTreatmentCode}"
+            },
+            {
+                "name": "${component.componentTable.functionalTreatmentDescription}"
+            },
+            {
+                "name": "${component.componentTable.estheticTreatmentCode}"
+            },
+            {
+                "name": "${component.componentTable.estheticTreatmentDescription}"
+            },
+            {
+                "name": "${component.componentTable.presenceHingeCode}"
+            },
+            {
+                "name": "${component.componentTable.presenceHingeDescription}"
+            },
+            {
+                "name": "${component.componentTable.flexHinge}"
+            },
+            {
+                "name": "${component.componentTable.trolleyTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.trolleyTypeDescription}"
+            },
+            {
+                "name": "${component.componentTable.wirecoreLength}"
+            },
+            {
+                "name": "${component.componentTable.plateLength}"
+            },
+            {
+                "name": "${component.componentTable.plateWidth}"
+            },
+            {
+                "name": "${component.componentTable.plateThickness}"
+            },
+            {
+                "name": "${component.componentTable.totalThickness}"
+            },
+            {
+                "name": "${component.componentTable.shankDiameter}"
+            },
+            {
+                "name": "${component.componentTable.typologyCode}"
+            },
+            {
+                "name": "${component.componentTable.typologyDescription}"
+            },
+            {
+                "name": "${component.componentTable.typologyDescription}"
+            },
+            {
+                "name": "${component.componentTable.anchorageModalityCode}"
+            },
+            {
+                "name": "${component.componentTable.anchorageModalityDescription}"
+            },
+            {
+                "name": "${component.componentTable.nArticulations}"
+            },
+            {
+                "name": "${component.componentTable.withStop}"
+            },
+            {
+                "name": "${component.componentTable.dwellAngleCode}"
+            },
+            {
+                "name": "${component.componentTable.dwellAngleDescription}"
+            },
+            {
+                "name": "${component.componentTable.thread}"
+            },
+            {
+                "name": "${component.componentTable.threadPitchCode}"
+            },
+            {
+                "name": "${component.componentTable.threadPitchDescription}"
+            },
+            {
+                "name": "${component.componentTable.inclinationAngle}"
+            },
+            {
+                "name": "${component.componentTable.height}"
+            },
+            {
+                "name": "${component.componentTable.hingeBaseWidth}"
+            },
+            {
+                "name": "${component.componentTable.diameterScrewHead}"
+            },
+            {
+                "name": "${component.componentTable.holeDiameter}"
+            },
+            {
+                "name": "${component.componentTable.adjustableAngle}"
+            },
+            {
+                "name": "${component.componentTable.nosePadsShapeCode}"
+            },
+            {
+                "name": "${component.componentTable.nosePadsShapeDescription}"
+            },
+            {
+                "name": "${component.componentTable.attachmentSystemCode}"
+            },
+            {
+                "name": "${component.componentTable.attachmentSystemDescription}"
+            },
+            {
+                "name": "${component.componentTable.symmetrical}"
+            },
+            {
+                "name": "${component.componentTable.nosePadTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.nosePadTypeDescription}"
+            },
+            {
+                "name": "${component.componentTable.logoProcessCode}"
+            },
+            {
+                "name": "${component.componentTable.logoProcessDescription}"
+            },
+            {
+                "name": "${component.componentTable.headShapeCode}"
+            },
+            {
+                "name": "${component.componentTable.headShapeDescription}"
+            },
+            {
+                "name": "${component.componentTable.connectionGraftTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.connectionGraftTypeDescription}"
+            },
+            {
+                "name": "${component.componentTable.treatmentTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.treatmentTypeDescription}"
+            },
+            {
+                "name": "Screw - Thread code"
+            },
+            {
+                "name": "Screw - Thread Description"
+            },
+            {
+                "name": "${component.componentTable.headDiameter}"
+            },
+            {
+                "name": "${component.componentTable.totalLength}"
+            },
+            {
+                "name": "${component.componentTable.usefulLength}"
+            },
+            {
+                "name": "${component.componentTable.padsShapeCode}"
+            },
+            {
+                "name": "${component.componentTable.padsShapeDescription}"
+            },
+            {
+                "name": "${component.componentTable.boxTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.boxTypeDescription}"
+            },
+            {
+                "name": "${component.componentTable.frontalFixingTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.frontalFixingTypeDescription}"
+            },
+            {
+                "name": "${component.componentTable.nosePadFixingTypeCode}"
+            },
+            {
+                "name": "${component.componentTable.nosePadFixingTypeDescription}"
+            },
+            {
+                "name": "${component.componentTable.rimlockFunction}"
+            },
+            {
+                "name": "${component.componentTable.stickDiameter}"
+            },
+            {
+                "name": "Galvanic Treatment (Yes/No)"
+            },
+            {
+                "name": "Actual Surface/Area galvanized (dm2)"
+            },
+            {
+                "name": "Treatment Type / Color Code"
+            },
+            {
+                "name": "Treatment Type / Color Description"
+            },
+            {
+                "name": "${component.componentTable.galvanicTreatmentNickelFree}"
+            },
+            {
+                "name": "First Deposited Plating Material Code"
+            },
+            {
+                "name": "First Deposited Plating Material Description"
+            },
+            {
+                "name": "Thickness First Deposited Plating Material [μ]"
+            },
+            {
+                "name": "Weight First Deposited Plating Material [gr]"
+            },
+            {
+                "name": "Second Deposited Plating Material Code"
+            },
+            {
+                "name": "Second Deposited Plating Material Description"
+            },
+            {
+                "name": "Thickness Second Deposited Plating Material [μ]"
+            },
+            {
+                "name": "Weight Second Deposited Plating Material [gr]"
+            },
+            {
+                "name": "Third Deposited Plating Material Code"
+            },
+            {
+                "name": "Third Deposited Plating Material Description"
+            },
+            {
+                "name": "Thickness Third Deposited Plating Material [μ]"
+            },
+            {
+                "name": "Weight Third Deposited Plating Material [gr]"
+            },
+            {
+                "name": "Fourth Deposited Plating Material Code"
+            },
+            {
+                "name": "Fourth Deposited Plating Material Description"
+            },
+            {
+                "name": "Thickness Fourth Deposited Plating Material [μ]"
+            },
+            {
+                "name": "Weight Fourth Deposited Plating Material [gr]"
+            },
+            {
+                "name": "Fifth Deposited Plating Material Code"
+            },
+            {
+                "name": "Fifth Deposited Plating Material Description"
+            },
+            {
+                "name": "Thickness Fifth Deposited Plating Material [μ]"
+            },
+            {
+                "name": "Weight Fifth Deposited Plating Material [gr]"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 1 Code"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 1 Description"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 2 Code"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 2 Description"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 3 Code"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 3 Description"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 4 Code"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 4 Description"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 5 Code"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 5 Description"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 1 BC Status"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 2 BC Status"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 3 BC Status"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 4 BC Status"
+            },
+            {
+                "name": "Galvanic Treatment Supplier 5 BC Status"
+            }
+        ]
+    },
+    "fields": [
+        {
+            "name": "catalogObjectType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "kering",
+                    "type": "catalogObjectType",
+                    "idSrc": "Catalogue Object Type Code",
+                    "codeSrc": "Catalogue Object Type Description"
+                }
+            }
+        },
+        {
+            "name": "code",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Catalogue Component Code"
+                }
+            }
+        },
+        {
+            "name": "description",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Catalogue Component Description"
+                }
+            }
+        },
+        {
+            "name": "objectType",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "id",
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Component Type Code"
+                                }
+                            }
+                        },
+                        {
+                            "name": "code",
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Component Type Description"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "moqIndicator",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "kering",
+                    "type": "moqTypeIndicator",
+                    "idSrc": "MOQ Type Indicator Code",
+                    "codeSrc": "MOQ Type Indicator Description"
+                }
+            }
+        },
+        {
+            "name": "minimumOrder",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Production MOQ"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "minimumOrderUom",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "id",
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Production MOQ UOM"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "leadTime",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Min LT (weeks)"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "leadTimeMaximum",
+            "ifCannotConvertInUseOriginal": true,
+            "ifCannotConvertOutUseOriginal": true,
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Max LT (weeks)"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "biobased",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Biobased (Yes/No)"
+                }
+            }
+        },
+        {
+            "name": "biobasedPercentage",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "% Biobased"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "techDesign",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Technical Drawing"
+                }
+            }
+        },
+        {
+            "name": "lastTechDesignDate",
+            "ifCannotConvertInUseOriginal": true,
+            "ifCannotConvertOutUseOriginal": true,
+            "converter": {
+                "name": "dateformat"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Last Tech Drawing Uploaded Date"
+                }
+            }
+        },
+        {
+            "name": "certification",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Component/Raw Material Certification"
+                }
+            }
+        },
+        {
+            "name": "lastComponentCertificate",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "createdAt",
+                            "ifCannotConvertInUseOriginal": true,
+                            "ifCannotConvertOutUseOriginal": true,
+                            "converter": {
+                                "name": "dateformat"
+                            },
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "${component.componentTable.lastComponentCertificate}"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "createdAt",
+            "ifCannotConvertInUseOriginal": true,
+            "ifCannotConvertOutUseOriginal": true,
+            "converter": {
+                "name": "dateformat"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Upload Date"
+                }
+            }
+        },
+        {
+            "name": "manufacturerCertification",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Player Certification"
+                }
+            }
+        },
+        {
+            "name": "lastManufacturerComponentCertificate",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "createdAt",
+                            "ifCannotConvertInUseOriginal": true,
+                            "ifCannotConvertOutUseOriginal": true,
+                            "converter": {
+                                "name": "dateformat"
+                            },
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Last Player Certification Uploaded Date"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "recycled",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Recycled (Yes/No)"
+                }
+            }
+        },
+        {
+            "name": "recycledPercentage",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "% Recycled"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "multiMaterial",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Multimaterial (Yes/No)"
+                }
+            }
+        },
+        {
+            "name": "materialBase",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "missingMandatoryCertifications",
+                            "transformer": {
+                                "name": "list",
+                                "config": {
+                                    "items": [
+                                        {
+                                            "transformer": {
+                                                "name": "library",
+                                                "config": {
+                                                    "idSrc": "Missing Mandatory Certification 1 Code",
+                                                    "codeSrc": "Missing Mandatory Certification 1 Description"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "library",
+                                                "config": {
+                                                    "idSrc": "Missing Mandatory Certification 2 Code",
+                                                    "codeSrc": "Missing Mandatory Certification 2 Description"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "library",
+                                                "config": {
+                                                    "idSrc": "Missing Mandatory Certification 3 Code",
+                                                    "codeSrc": "Missing Mandatory Certification 3 Description"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "library",
+                                                "config": {
+                                                    "idSrc": "Missing Mandatory Certification 4 Code",
+                                                    "codeSrc": "Missing Mandatory Certification 4 Description"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "library",
+                                                "config": {
+                                                    "idSrc": "Missing Mandatory Certification 5 Code",
+                                                    "codeSrc": "Missing Mandatory Certification 5 Description"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "vendorCode",
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Base Material Vendor Code"
+                                }
+                            }
+                        },
+                        {
+                            "name": "vendorDescription",
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Base Material Vendor Description"
+                                }
+                            }
+                        },
+                        {
+                            "name": "materialFamily",
+                            "transformer": {
+                                "name": "child",
+                                "config": {
+                                    "fields": [
+                                        {
+                                            "name": "id",
+                                            "transformer": {
+                                                "name": "copy",
+                                                "config": {
+                                                    "src": "Material Family KEYE Code"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "name": "code",
+                                            "transformer": {
+                                                "name": "copy",
+                                                "config": {
+                                                    "src": "Material Family KEYE Description"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "vendorMaterialFamily",
+                            "transformer": {
+                                "name": "child",
+                                "config": {
+                                    "fields": [
+                                        {
+                                            "name": "id",
+                                            "transformer": {
+                                                "name": "copy",
+                                                "config": {
+                                                    "src": "Material Family Vendor Code"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "name": "code",
+                                            "transformer": {
+                                                "name": "copy",
+                                                "config": {
+                                                    "src": "Material Family Vendor Description"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "material",
+                            "transformer": {
+                                "name": "child",
+                                "config": {
+                                    "fields": [
+                                        {
+                                            "name": "id",
+                                            "transformer": {
+                                                "name": "copy",
+                                                "config": {
+                                                    "src": "Base Material KEYE Code"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "name": "code",
+                                            "transformer": {
+                                                "name": "copy",
+                                                "config": {
+                                                    "src": "Base Material KEYE Description"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "madeIn",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "country",
+                    "idSrc": "Made In Code",
+                    "codeSrc": "Made In Description"
+                }
+            }
+        },
+        {
+            "name": "materialCountryOfOrigin",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "country",
+                    "idSrc": "Material Country of Origin Code",
+                    "codeSrc": "Material Country of Origin Description"
+                }
+            }
+        },
+        {
+            "name": "rawMaterialProvenance",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "optionalCountry",
+                    "idSrc": "Raw Material Provenance Code",
+                    "codeSrc": "Raw Material Provenance Description"
+                }
+            }
+        },
+        {
+            "name": "customization",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Customized (Yes/No)"
+                }
+            }
+        },
+        {
+            "name": "catalogWeight",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Catalogue Weight [gr]"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "catalogQtyForWeight",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Catalogue Qty for Weight"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "catalogWeightUom",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "id",
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Catalogue UOM for Weight"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "familyCode",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Component Family Code"
+                }
+            }
+        },
+        {
+            "name": "presenceHinge",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "presenceHinge",
+                    "idSrc": "${component.componentTable.presenceHingeCode}",
+                    "codeSrc": "${component.componentTable.presenceHingeDescription}"
+                }
+            }
+        },
+        {
+            "name": "flexHinge",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.flexHinge}"
+                }
+            }
+        },
+        {
+            "name": "trolleyType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "trolleyType",
+                    "idSrc": "${component.componentTable.trolleyTypeCode}",
+                    "codeSrc": "${component.componentTable.trolleyTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "functionalTreatment",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "functionalTreatment",
+                    "idSrc": "${component.componentTable.functionalTreatmentCode}",
+                    "codeSrc": "${component.componentTable.functionalTreatmentDescription}"
+                }
+            }
+        },
+        {
+            "name": "estheticTreatment",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "estheticTreatment",
+                    "idSrc": "${component.componentTable.estheticTreatmentCode}",
+                    "codeSrc": "${component.componentTable.estheticTreatmentDescription}"
+                }
+            }
+        },
+        {
+            "name": "wirecoreLength",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.wirecoreLength}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "plateLength",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.plateLength}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "plateWidth",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.plateWidth}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "plateThickness",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.plateThickness}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "totalThickness",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.totalThickness}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "shankDiameter",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.shankDiameter}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "typology",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "componentTypology",
+                    "idSrc": "${component.componentTable.typologyCode}",
+                    "codeSrc": "${component.componentTable.typologyDescription}"
+                }
+            }
+        },
+        {
+            "name": "anchorageModality",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "anchorageModality",
+                    "idSrc": "${component.componentTable.anchorageModalityCode}",
+                    "codeSrc": "${component.componentTable.anchorageModalityDescription}"
+                }
+            }
+        },
+        {
+            "name": "nArticulations",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.nArticulations}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "int"
+                }
+            }
+        },
+        {
+            "name": "withStop",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.withStop}"
+                }
+            }
+        },
+        {
+            "name": "dwellAngle",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "assemblyAngle",
+                    "idSrc": "${component.componentTable.dwellAngleCode}",
+                    "codeSrc": "${component.componentTable.dwellAngleDescription}"
+                }
+            }
+        },
+        {
+            "name": "thread",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.thread}"
+                }
+            }
+        },
+        {
+            "name": "threadPitch",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "threadPitch",
+                    "idSrc": "${component.componentTable.threadPitchCode}",
+                    "codeSrc": "${component.componentTable.threadPitchDescription}"
+                }
+            }
+        },
+        {
+            "name": "inclinationAngle",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.inclinationAngle}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "height",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.height}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "hingeBaseWidth",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.hingeBaseWidth}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "diameterScrewHead",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.diameterScrewHead}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "holeDiameter",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.holeDiameter}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "adjustableAngle",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.adjustableAngle}"
+                }
+            }
+        },
+        {
+            "name": "nosePadShape",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "nosePadShape",
+                    "idSrc": "${component.componentTable.nosePadsShapeCode}",
+                    "codeSrc": "${component.componentTable.nosePadsShapeDescription}"
+                }
+            }
+        },
+        {
+            "name": "attachmentSystem",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "attachmentSystem",
+                    "idSrc": "${component.componentTable.attachmentSystemCode}",
+                    "codeSrc": "${component.componentTable.attachmentSystemDescription}"
+                }
+            }
+        },
+        {
+            "name": "symmetrical",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.symmetrical}"
+                }
+            }
+        },
+        {
+            "name": "nosePadType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "nosePadType",
+                    "idSrc": "${component.componentTable.nosePadTypeCode}",
+                    "codeSrc": "${component.componentTable.nosePadTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "brand",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "brand",
+                    "idSrc": "Brand Code",
+                    "codeSrc": "Brand Description"
+                }
+            }
+        },
+        {
+            "name": "color",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "type": "color",
+                    "idSrc": "Color Code",
+                    "codeSrc": "Color Description"
+                }
+            }
+        },
+        {
+            "name": "logoProcess",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "logoProcess",
+                    "idSrc": "${component.componentTable.logoProcessCode}",
+                    "codeSrc": "${component.componentTable.logoProcessDescription}"
+                }
+            }
+        },
+        {
+            "name": "headShape",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "headShape",
+                    "idSrc": "${component.componentTable.headShapeCode}",
+                    "codeSrc": "${component.componentTable.headShapeDescription}"
+                }
+            }
+        },
+        {
+            "name": "connectionGraftType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "connectionGraftType",
+                    "idSrc": "${component.componentTable.connectionGraftTypeCode}",
+                    "codeSrc": "${component.componentTable.connectionGraftTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "treatmentType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "treatmentType",
+                    "idSrc": "${component.componentTable.treatmentTypeCode}",
+                    "codeSrc": "${component.componentTable.treatmentTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "threadDimension",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "threadDimension",
+                    "idSrc": "Screw - Thread code",
+                    "codeSrc": "Screw - Thread Description"
+                }
+            }
+        },
+        {
+            "name": "headDiameter",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.headDiameter}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "totalLength",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.totalLength}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "usefulLength",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.usefulLength}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "padsShape",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "padsShape",
+                    "idSrc": "${component.componentTable.padsShapeCode}",
+                    "codeSrc": "${component.componentTable.padsShapeDescription}"
+                }
+            }
+        },
+        {
+            "name": "boxType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "boxType",
+                    "idSrc": "${component.componentTable.boxTypeCode}",
+                    "codeSrc": "${component.componentTable.boxTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "frontalFixingType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "frontalFixingType",
+                    "idSrc": "${component.componentTable.frontalFixingTypeCode}",
+                    "codeSrc": "${component.componentTable.frontalFixingTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "nosePadFixingType",
+            "transformer": {
+                "name": "library",
+                "config": {
+                    "ns": "common",
+                    "type": "nosePadFixingType",
+                    "idSrc": "${component.componentTable.nosePadFixingTypeCode}",
+                    "codeSrc": "${component.componentTable.nosePadFixingTypeDescription}"
+                }
+            }
+        },
+        {
+            "name": "rimlockFunction",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.rimlockFunction}"
+                }
+            }
+        },
+        {
+            "name": "stickDiameter",
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "${component.componentTable.stickDiameter}"
+                }
+            },
+            "converter": {
+                "name": "number",
+                "config": {
+                    "type": "float"
+                }
+            }
+        },
+        {
+            "name": "hasGalvanicTreatment",
+            "converter": {
+                "name": "flag"
+            },
+            "transformer": {
+                "name": "copy",
+                "config": {
+                    "src": "Galvanic Treatment (Yes/No)"
+                }
+            }
+        },
+        {
+            "name": "galvanicTreatment",
+            "transformer": {
+                "name": "child",
+                "config": {
+                    "fields": [
+                        {
+                            "name": "areaGalvanized",
+                            "ifCannotConvertInUseOriginal": true,
+                            "ifCannotConvertOutUseOriginal": true,
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "Actual Surface/Area galvanized (dm2)"
+                                }
+                            },
+                            "converter": {
+                                "name": "number",
+                                "config": {
+                                    "type": "float"
+                                }
+                            }
+                        },
+                        {
+                            "name": "type",
+                            "transformer": {
+                                "name": "library",
+                                "config": {
+                                    "ns": "common",
+                                    "type": "galvanicTreatmentType",
+                                    "idSrc": "Treatment Type / Color Code",
+                                    "codeSrc": "Treatment Type / Color Description"
+                                }
+                            }
+                        },
+                        {
+                            "name": "nickelFree",
+                            "converter": {
+                                "name": "flag"
+                            },
+                            "transformer": {
+                                "name": "copy",
+                                "config": {
+                                    "src": "${component.componentTable.galvanicTreatmentNickelFree}"
+                                }
+                            }
+                        },
+                        {
+                            "name": "platingMaterials",
+                            "transformer": {
+                                "name": "list",
+                                "config": {
+                                    "items": [
+                                        {
+                                            "transformer": {
+                                                "name": "child",
+                                                "config": {
+                                                    "fields": [
+                                                        {
+                                                            "name": "platingMaterial",
+                                                            "transformer": {
+                                                                "name": "child",
+                                                                "config": {
+                                                                    "fields": [
+                                                                        {
+                                                                            "name": "id",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "First Deposited Plating Material Code"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "name": "code",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "First Deposited Plating Material Description"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "thickness",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Thickness First Deposited Plating Material [μ]"
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "weight",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Weight First Deposited Plating Material [gr]"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "child",
+                                                "config": {
+                                                    "fields": [
+                                                        {
+                                                            "name": "platingMaterial",
+                                                            "transformer": {
+                                                                "name": "child",
+                                                                "config": {
+                                                                    "fields": [
+                                                                        {
+                                                                            "name": "id",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Second Deposited Plating Material Code"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "name": "code",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Second Deposited Plating Material Description"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "thickness",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Thickness Second Deposited Plating Material [μ]"
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "weight",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Weight Second Deposited Plating Material [gr]"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "child",
+                                                "config": {
+                                                    "fields": [
+                                                        {
+                                                            "name": "platingMaterial",
+                                                            "transformer": {
+                                                                "name": "child",
+                                                                "config": {
+                                                                    "fields": [
+                                                                        {
+                                                                            "name": "id",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Third Deposited Plating Material Code"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "name": "code",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Third Deposited Plating Material Description"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "thickness",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Thickness Third Deposited Plating Material [μ]"
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "weight",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Weight Third Deposited Plating Material [gr]"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "child",
+                                                "config": {
+                                                    "fields": [
+                                                        {
+                                                            "name": "platingMaterial",
+                                                            "transformer": {
+                                                                "name": "child",
+                                                                "config": {
+                                                                    "fields": [
+                                                                        {
+                                                                            "name": "id",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Fourth Deposited Plating Material Code"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "name": "code",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Fourth Deposited Plating Material Description"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "thickness",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Thickness Fourth Deposited Plating Material [μ]"
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "weight",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Weight Fourth Deposited Plating Material [gr]"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "transformer": {
+                                                "name": "child",
+                                                "config": {
+                                                    "fields": [
+                                                        {
+                                                            "name": "platingMaterial",
+                                                            "transformer": {
+                                                                "name": "child",
+                                                                "config": {
+                                                                    "fields": [
+                                                                        {
+                                                                            "name": "id",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Fifth Deposited Plating Material Code"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "name": "code",
+                                                                            "transformer": {
+                                                                                "name": "copy",
+                                                                                "config": {
+                                                                                    "src": "Fifth Deposited Plating Material Description"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "thickness",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Thickness Fifth Deposited Plating Material [μ]"
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "weight",
+                                                            "transformer": {
+                                                                "name": "copy",
+                                                                "config": {
+                                                                    "src": "Weight Fifth Deposited Plating Material [gr]"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "suppliers",
+                            "transformer": {
+                              "name": "list",
+                              "config": {
+                                "items": [
+                                  {
+                                    "transformer": {
+                                      "name": "child",
+                                      "config": {
+                                        "fields": [
+                                          {
+                                            "name": "supplier",
+                                            "transformer": {
+                                              "name": "child",
+                                              "config": {
+                                                "fields": [
+                                                  {
+                                                    "name": "id",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 1 Code"
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "code",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 1 Description"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "name": "supplierStatus",
+                                            "transformer": {
+                                              "name": "copy",
+                                              "config": {
+                                                "src": "Galvanic Treatment Supplier 1 BC Status"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "transformer": {
+                                      "name": "child",
+                                      "config": {
+                                        "fields": [
+                                          {
+                                            "name": "supplier",
+                                            "transformer": {
+                                              "name": "child",
+                                              "config": {
+                                                "fields": [
+                                                  {
+                                                    "name": "id",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 2 Code"
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "code",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 2 Description"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "name": "supplierStatus",
+                                            "transformer": {
+                                              "name": "copy",
+                                              "config": {
+                                                "src": "Galvanic Treatment Supplier 2 BC Status"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "transformer": {
+                                      "name": "child",
+                                      "config": {
+                                        "fields": [
+                                          {
+                                            "name": "supplier",
+                                            "transformer": {
+                                              "name": "child",
+                                              "config": {
+                                                "fields": [
+                                                  {
+                                                    "name": "id",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 3 Code"
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "code",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 3 Description"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "name": "supplierStatus",
+                                            "transformer": {
+                                              "name": "copy",
+                                              "config": {
+                                                "src": "Galvanic Treatment Supplier 3 BC Status"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "transformer": {
+                                      "name": "child",
+                                      "config": {
+                                        "fields": [
+                                          {
+                                            "name": "supplier",
+                                            "transformer": {
+                                              "name": "child",
+                                              "config": {
+                                                "fields": [
+                                                  {
+                                                    "name": "id",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 4 Code"
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "code",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 4 Description"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "name": "supplierStatus",
+                                            "transformer": {
+                                              "name": "copy",
+                                              "config": {
+                                                "src": "Galvanic Treatment Supplier 4 BC Status"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "transformer": {
+                                      "name": "child",
+                                      "config": {
+                                        "fields": [
+                                          {
+                                            "name": "supplier",
+                                            "transformer": {
+                                              "name": "child",
+                                              "config": {
+                                                "fields": [
+                                                  {
+                                                    "name": "id",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 5 Code"
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "code",
+                                                    "transformer": {
+                                                      "name": "copy",
+                                                      "config": {
+                                                        "src": "Galvanic Treatment Supplier 5 Description"
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "name": "supplierStatus",
+                                            "transformer": {
+                                              "name": "copy",
+                                              "config": {
+                                                "src": "Galvanic Treatment Supplier 5 BC Status"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
