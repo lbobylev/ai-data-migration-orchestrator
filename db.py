@@ -1,6 +1,7 @@
 import subprocess
 import atexit
 from pymongo import MongoClient
+from typing import Literal, TypedDict, List
 
 MONGO_URI = "mongodb://localhost:27017"
 APP_NAME = "surge-agent"
@@ -74,3 +75,16 @@ def get_client() -> MongoClient:
 
     return _client
 
+def find_one(collection_name: str, predicate = {}, db_name = "kering") -> dict | None:
+    client = get_client()
+    db = client[db_name]
+    collection = db[collection_name]
+
+    return collection.find_one(predicate)
+
+def find_all(collection_name: str, predicate = {}, db_name = "kering") -> List[dict]:
+    client = get_client()
+    db = client[db_name]
+    collection = db[collection_name]
+
+    return list(collection.find(predicate))

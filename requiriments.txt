@@ -1,3 +1,10 @@
 rapidfuzz>=3.0.0
 pymongo>=4.6
 langgraph
+langchain-openai
+questionary
+pandas
+openpyxl
+tabulate
+numpy
+pygithub
