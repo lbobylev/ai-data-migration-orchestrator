@@ -1,370 +1,255 @@
-from langgraph.graph import StateGraph, START, END
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.messages import (
-    SystemMessage,
-    HumanMessage,
-)
-from tools.bot import bot
-from tools.file_utils import select_file, read_excel
-from logger import ToolLogger
-from typing import Literal, TypedDict
-import json
-from pydantic import BaseModel, Field, ValidationError
+from langgraph.graph import END, START, StateGraph
 
-logger = ToolLogger()
-tools = [bot, select_file, read_excel]
+from app_types import (
+    DataMigration,
+    GithubIssue,
+    MyState,
+)
+from confirm import set_confirm_disable
+from db import mongo, start_port_forward, stop_port_forward
+from github_utils import get_issue
+from logger import GraphLogger, get_logger
+from nodes.bug_classification_node import make_bug_classification_node
+from nodes.data_extraction_node import make_data_extraction_node
+from nodes.data_migration_classification_node import (
+    make_data_migration_classification_node,
+)
+from nodes.file_download_node import file_download_node
+from nodes.operation_plan_fanout_node import make_operation_plan_fanout_node
+from nodes.operation_plan_init_node import make_operation_plan_init_node
+from nodes.operation_worker_node import make_operation_worker_node
+from nodes.operations_detection_node import make_operation_detection_node
+from nodes.task_classification_node import make_task_classification_node
+from nodes.user_input_processing_node import make_user_input_processing_node
+from nodes.operation_gather_node import operation_gather_node
+from nodes.supplier_library_entry_deprecation_node import (
+    make_supplier_library_entry_deprecation_node,
+)
+
+load_dotenv()
+graphLogger = GraphLogger()
+logger = get_logger()
 fast_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
 smart_llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
 
-Status = Literal[
-    "data_migration_detected",
-    "task_classification_failed",
-    "base_material_update_detected",
-    "data_migration_classification_failed",
-    "base_material_material_patch_detected",
-    "base_material_patch_classification_failed",
-    "base_material_patch_creation_failed",
-    "file_selected",
-    "schema_validation_passed",
-    "file_selection_failed",
-    "other",
-]
-
-
-class LibraryEntry(BaseModel):
-    key: str = Field(
-        description="The key of the library entry, which is the unique identifier."
-    )
-
-
-class BaseMaterialPredicate(BaseModel):
-    organizationId: str = Field(description="The organization ID")
-    vendorCode: str = Field(
-        description="The base material vendor code, which is the key of the base material."
-    )
-
-
-class BaseMaterialPatch(BaseModel):
-    predicate: BaseMaterialPredicate = Field(
-        description="The predicate for the base material update."
-    )
-    material: LibraryEntry = Field(
-        description="The base material key, which is the key of the base material."
-    )
-
-
-class MyState(TypedDict):
-    user_prompt: str
-    user_input: str
-    status: Status
-    task_data: dict | None
-
-
-def user_input_processing_node(state: MyState) -> MyState:
-    system_prompt = """
-    You should process the user input and return it as a string.
-    The user input should be prepaged for futher classification.
-    You should remove any unnecessary information, such as greetings, and focus on the main request.
-    You should fix grammatical errors and typos, but do not change the meaning of the request.
-    You shoudl make it as much concise as possible, but still keep the main request intact.
-    """
-    response = fast_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_input"]),
-        ]
-    )
-
-    return {
-        **state,
-        "user_prompt": str(response.content),
-        "user_input": state["user_input"],
-    }
-
-
-def task_classification_node(state: MyState) -> MyState:
-    system_prompt = """
-    You are an analyst. Classify the user's request.
-If the request is about:
-    - changing a mapping
-    - mentions an attached file
-    - involves updating data
-    - mentions fields or columns in a file to be updated
-classify it as "data_migration_detected". 
-Otherwise, classify it as "other".
-Return exactly one of: "data_migration_detected", "other".
-    """
-    response = fast_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_prompt"]),
-        ]
-    )
-    status = str(response.content).strip().lower()
-    match status:
-        case "data_migration_detected":
-            print("Data migration detected, proceeding to classification.")
-            return {**state, "status": "data_migration_detected"}
-        case _:
-            print("Task classification failed, stopping processing.")
-            return {**state, "status": "task_classification_failed"}
-
-
-def data_migration_classification_node(state: MyState) -> MyState:
-    system_prompt = """
-    You are an analyst. Classify the data migration request.
-Classify the request. If it involves changing, replacing, remapping, or updating base naterials (e.g., replacing old base material keys with new ones, mapping one set of base materials to another, or updating components based on such changes), output exactly: base_material_update_detected. Otherwise output exactly: other. You must respond "other" or "base_material_update_detected".
-"""
-    response = smart_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_prompt"]),
-        ]
-    )
-    response_content = str(response.content).strip().lower()
-    match response_content:
-        case "base_material_update_detected":
-            print("Base material update detected, proceeding to file selection.")
-            return {**state, "status": "base_material_update_detected"}
-        case _:
-            print("Data migration classification failed, stopping processing.")
-            return {**state, "status": "data_migration_classification_failed"}
-
-
-def file_selection_node(state: MyState) -> MyState:
-    file_path = select_file.invoke({})
-    if not file_path:
-        print("No file selected, stopping processing.")
-        return {**state, "status": "file_selection_failed"}
-    task_data = state.get("task_data") or {}
-    return {
-        **state,
-        "status": "file_selected",
-        "task_data": {**task_data, "file_path": file_path},
-    }
-
-
-def schema_validation_node(state: MyState) -> MyState:
-    return {**state, "status": "schema_validation_passed"}
-
-
-def base_material_update_node(state: MyState) -> MyState:
-    predicate_prompt = """
-You are given a JSON object containing vendor and material information. Your task is to extract and return a simplified JSON object in the following format:  
-{
-  "organizationId": "<Vendor Code value>",
-  "vendorCode": "<Base Material Vendor Code value>"
-}
-
-Rules:  
-1. Keys in the input JSON may vary in naming. Treat any of the following as possible vendor keys:  
-   "Vendor Code", "vendor_code", "vendor", "organization", "vendorName", "vendor_id", "org".  
-   Treat any of the following as possible base material vendor code keys:  
-   "Base Material Vendor Code", "base_material_vendor_code", "materialVendor", "material_vendor_code", "material_vendor".  
-
-2. organizationId should be determined from the vendor value in the input (case-insensitive).  
-   - Use the organization list below for context. If the value matches (exact match ignoring case) one of these organizations, keep it as-is.  
-   - If it doesn’t match, still return it as-is.  
-
-3. vendorCode should be determined from the base material vendor code value in the input, regardless of exact key name.  
-
-4. Output must be a valid JSON object containing only organizationId and vendorCode.  
-   - No explanations, no extra keys, no code blocks.  
-
-Example:  
-Input:  
-{
-    "vendor": "Barberini",
-    "material_vendor_code": "PA",
-    "otherData": "ignore"
-}  
-
-Output:  
-{
-    "organizationId": "barberini",
-    "vendorCode": "PA"
-}  
-"""
-
-    task_data = state.get("task_data") or {}
-
-    return {**state, "task_data": {**task_data, "predicate_prompt": predicate_prompt}}
-
-
-def base_material_patch_classification_node(state: MyState) -> MyState:
-    system_prompt = """
-You are a classifier that determines the type of request based on user input.  
-If the request explicitly mentions "KEYE key" in relation to a base material (e.g., OLD Base Material KEYE Key, NEW Base Material KEYE Key, or similar), return exactly:
-base_material_material_patch_detected
-Otherwise, return exactly:
-other
-Return strictly one of these two lines.
-"""
-    response = smart_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_prompt"]),
-        ]
-    )
-    response_content = str(response.content).strip().lower()
-    match response_content:
-        case "base_material_material_patch_detected":
-            return {**state, "status": "base_material_material_patch_detected"}
-        case _:
-            print("Base material patch classification failed, stopping processing.")
-            return {**state, "status": "base_material_patch_classification_failed"}
-
-
-def base_material_patch_node(state: MyState) -> MyState:
-    task_data = state.get("task_data") or {}
-    predicate_prompt = task_data.get("predicate_prompt")
-    if not predicate_prompt:
-        print("No predicate prompt found, stopping processing.")
-        return {**state, "status": "other"}
-    status = state.get("status")
-    match status:
-        case "base_material_material_patch_detected":
-            file_path = task_data.get("file_path")
-            rows = read_excel.invoke({"file_path": file_path})
-            for row in rows:
-                create_base_material_material_patch(predicate_prompt, row)
-
-            return {**state, "status": "other"}
-        case _:
-            print("Base material patch creation failed, stopping processing.")
-            return {**state, "status": "base_material_patch_creation_failed"}
-
-
-def create_base_material_material_patch(predicate_prompt: str, row: dict) -> None:
-    system_prompt = (
-        """
-You will receive two separate system prompts:
-Predicate Prompt – This instructs you how to create a predicate.
-Material Key Prompt – This instructs you how to extract the base material key from a JSON object.
-Perform both actions exactly as each system prompt describes.
-Use the Predicate Prompt to produce a string output (the predicate result).
-Use the Material Key Prompt to find the required base material key in the provided JSON and return its value (the base material key result).
-Finally, return your results in one JSON object with the following structure:
-{
-  "predicate": "<predicate result>",
-  "material": {
-    "key": "<base material key result>"
-  }
-"""
-        f"""
-Predicate prompt:
-{predicate_prompt}"""
-        """
-Material key prompt:
-Given a JSON object, find the value of the key whose name contains all of the following words (case-insensitive): 
-"new", "keye", "key", and "base material". 
-If multiple keys match, return the first match. 
-If no key matches, return null.
-
-Example input:
-{
-    "Vendor Code": "barberini",
-    "Base Material Vendor Code": "PA",
-    "Base Material Vendor Description": "Nylon",
-    "Material Family Code": "PLA",
-    "Material Family Description": "Plastic",
-    "Base Material Certification Uploaded": "No",
-    "OLD Base Material KEYE Key": "Plastic - nylon - conventional",
-    "Mandatory Certification Type Code 1": NaN,
-    "Mandatory Certification Type Description 1": NaN,
-    "Validation": "ACCEPTED",
-    "NEW Base Material KEYE Key": "Plastic - nylon - conventional - Grilamid TR XE 3805"
-}
-Expected output:
-"Plastic - nylon - conventional - Grilamid TR XE 3805"
-"""
-    )
-
-    struct_llm = smart_llm.with_structured_output(BaseMaterialPatch, method="json_mode")
-    patch = struct_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=json.dumps(row, ensure_ascii=False)),
-        ]
-    )
-
-    print(patch)
+set_confirm_disable(True)
 
 
 def route_by_status(state: MyState) -> str:
     match state.get("status"):
         case "data_migration_detected":
             return "data_migration_classification_node"
-        case "base_material_update_detected":
-            return "file_selection_node"
-        case "file_selected":
-            return "schema_validation_node"
-        case "schema_validation_passed":
-            return "base_material_update_node"
-        case "base_material_material_patch_detected":
-            return "base_material_patch_node"
-
-    print("Task is not recognized, routing to END.")
+        case "bug_detected":
+            return "bug_classification_node"
+        case "data_migration_classified":
+            return "operation_detection_node"
+        case "operations_detected":
+            return "operation_plan_init_node"
+    logger.error("Task is not recognized, routing to END.")
     return END
 
 
+def route_by_data_source(state: MyState) -> str:
+    task = state.get("task")
+    if isinstance(task, DataMigration):
+        if task.data_source == "attachment_file":
+            return "file_download_node"
+        elif task.data_source == "user_request":
+            return "data_extraction_node"
+    logger.error("Data source is not recognized, routing to END.")
+    return END
+
+
+operation_plan_fanout_node = make_operation_plan_fanout_node(smart_llm)
+
+
 graph = StateGraph(MyState)
-graph.add_node("user_input_processing_node", user_input_processing_node)
-graph.add_node("task_classification_node", task_classification_node)
-graph.add_node("data_migration_classification_node", data_migration_classification_node)
-graph.add_node("base_material_update_node", base_material_update_node)
-graph.add_node("file_selection_node", file_selection_node)
-graph.add_node("schema_validation_node", schema_validation_node)
+graph.add_node("user_input_processing_node", make_user_input_processing_node(fast_llm))
+graph.add_node("task_classification_node", make_task_classification_node(fast_llm))
+graph.add_node("bug_classification_node", make_bug_classification_node(fast_llm))
 graph.add_node(
-    "base_material_patch_classification_node", base_material_patch_classification_node
+    "data_migration_classification_node",
+    make_data_migration_classification_node(fast_llm),
 )
-graph.add_node("base_material_patch_node", base_material_patch_node)
+graph.add_node("operation_detection_node", make_operation_detection_node(smart_llm))
+graph.add_node("operation_plan_init_node", make_operation_plan_init_node(fast_llm))
+graph.add_node(
+    "supplier_library_entry_derprecation_node",
+    make_supplier_library_entry_deprecation_node(fast_llm),
+)
+graph.add_node(
+    "operation_plan_fanout_node",
+    operation_plan_fanout_node,
+)
+graph.add_node(
+    "operation_worker_node",
+    make_operation_worker_node(fast_llm),
+)
+graph.add_node(
+    "operation_gather_node",
+    operation_gather_node,
+)
+graph.add_node("file_download_node", file_download_node)
+graph.add_node("data_extraction_node", make_data_extraction_node(fast_llm))
 graph.add_edge(START, "user_input_processing_node")
 graph.add_edge("user_input_processing_node", "task_classification_node")
 graph.add_conditional_edges(
     "task_classification_node",
     route_by_status,
-    ["data_migration_classification_node", END],
+    ["data_migration_classification_node", "bug_classification_node", END],
 )
+graph.add_edge("bug_classification_node", END)
+graph.add_edge("data_migration_classification_node", "operation_detection_node")
 graph.add_conditional_edges(
-    "data_migration_classification_node",
-    route_by_status,
-    ["file_selection_node", END],
+    "operation_detection_node",
+    route_by_data_source,
+    ["file_download_node", "data_extraction_node", END],
 )
+
+graph.add_edge("file_download_node", "operation_plan_init_node")
+graph.add_edge("data_extraction_node", "operation_plan_init_node")
+graph.add_conditional_edges("operation_plan_init_node", operation_plan_fanout_node)
+
+graph.add_edge("operation_plan_fanout_node", "operation_worker_node")
+graph.add_edge("operation_worker_node", "operation_gather_node")
+
+graph.add_edge("operation_plan_fanout_node", "supplier_library_entry_derprecation_node")
+graph.add_edge("supplier_library_entry_derprecation_node", "operation_gather_node")
+
+
+def route_by_completion(state: MyState) -> str:
+    operations = state.get("operations")
+    if operations is None:
+        return END
+    total = operations.get("total") or 0
+    done = operations.get("done") or 0
+    if done >= total and total > 0:
+        return END
+    return "operation_gather_node"
+
+
 graph.add_conditional_edges(
-    "file_selection_node",
-    route_by_status,
-    ["schema_validation_node", END],
+    "operation_gather_node",
+    route_by_completion,
 )
-graph.add_conditional_edges(
-    "schema_validation_node",
-    route_by_status,
-    ["base_material_update_node", END],
-)
-graph.add_edge("base_material_update_node", "base_material_patch_classification_node")
-graph.add_conditional_edges(
-    "base_material_patch_classification_node",
-    route_by_status,
-    ["base_material_patch_node", END],
-)
-graph.add_edge("base_material_patch_node", END)
 app = graph.compile()
 
-user_input = """
-We’d need to change the mapping of the base materials listed in the attached file.
+one_deprecation = """
+  Email Thread: VIRTUS AMS: Review Supplier Library for Mirage
+  acquisition\nDate of report: 21.08.2025\nReporter: Kering Supply
+  Chain\n\nReference environment: PROD Env\n**Bug description and current
+  behavior:**\n\nWe need to:\na. Modify the \u201cSupplier Name\u201d of
+  \u201cIT01527350126\u201d from \u201cMirage spa\u201d to \u201cMirage DO NOT
+  USE\u201d\nb. Add the new supplier \u201cIT04092700121\u201d \u2013
+  \u201cMIRAGE SRL\u201d\n\n| 0                                              |
+  1                                         | 2                 | 3                     |
+  4                            | 5                            | 6                      |
+  7                  | 8                | 9                     | 10               |
+  \n|:-----------------------------------------------|:------------------------------------------|
+  :------------------|:----------------------|:-----------------------------|:-----------------------------|
+  :-----------------------|:-------------------|:-----------------|:----------------------|
+  :-----------------|\n| TO DO                                          |
+  Supplier VAT Number / Registration Number | SAP Supplier Code | Supplier
+  Country Code | Supplier Country Description | Supplier Name                |
+  Semi Finished Supplier | Supplier Type      | Supplier Status  | Catalogue
+  Uploaded By | Visibility Rules |\n| a. review the \"Supplier Name\" of
+  IT01527350126 | IT01527350126                             | 100239            |
+  IT                    | Italy                        | Mirage spa Mirage DO
+  NOT USE | No                     | Frame Manufacturer | Not Active in BC |
+  nan                   | No               |\n| b. Add a new supplier                          |
+  IT04092700121                             | 107681            | IT                    |
+  Italy                        | MIRAGE SRL                   | No                     |
+  Frame Manufacturer | Not Active in BC | nan                   | No               |
+  \n\n**Expected result:** update the supplier library ad detailed above.
+  \n\n**Notes and/or comments:**\nThe supplier \u2018Mirage spa\u2019 has been
+  acquired by a third party. As a result, the company name and VAT number have
+  been changed respectively to \u2018Mirage SRL\u2019 and
+  \u2018IT04092700121\u2019.\n\nWe therefore had to create a new master data
+  record in SAP for \u2018Mirage SRL\u2019 and disable the previous code for
+  \u2018Mirage spa\u2019.
+  """
 
-Expected result: substitute the “OLD Base Material KEYE Key” (column G in the attached file) with “NEW Base Material KEYE Key” (column K in the attached file).
-We expect that all components that have one or more of the base materials mentioned in the attached file will be consequently updated.
+many_deprecations = """
+  **Email Thread:** VIRTUS AMS: Review Supplier Library for LUMINA and ASTRA acquisitions  
+**Date of report:** 04.09.2025  
+**Reporter:** Kering Supply Chain  
+
+**Reference environment:** PROD Env  
+
+**Bug description and current behavior:**  
+
+We need to:  
+a. Modify the “Supplier Name” of “IT02133440987” from “Lumina s.p.a.” to “Lumina DO NOT USE”  
+b. Add the new supplier “IT05876230411” – “LUMINA SRL”  
+
+c. Modify the “Supplier Name” of “IT03398470122” from “Astra spa” to “Astra DO NOT USE”  
+d. Add the new supplier “IT07845320991” – “ASTRA SRL”  
+
+| 0   | 1 (Supplier VAT Number / Registration Number) | 2 (SAP Supplier Code) | 3 (Supplier Country Code) | 4 (Supplier Country Description) | 5 (Supplier Name) | 6 (Semi Finished Supplier) | 7 (Supplier Type) | 8 (Supplier Status) | 9 (Catalogue Uploaded By) | 10 (Visibility Rules) |  
+|:---|:----------------------------------------------|:----------------------|:--------------------------|:--------------------------------|:------------------|:----------------------------|:------------------|:--------------------|:--------------------------|:---------------------|  
+| a. review the "Supplier Name" of IT02133440987 | IT02133440987 | 109823 | IT | Italy | Lumina s.p.a. Lumina DO NOT USE | No | Frame Manufacturer | Not Active in BC | nan | No |  
+| b. Add a new supplier | IT05876230411 | 112456 | IT | Italy | LUMINA SRL | No | Frame Manufacturer | Not Active in BC | nan | No |  
+| c. review the "Supplier Name" of IT03398470122 | IT03398470122 | 110542 | IT | Italy | Astra spa Astra DO NOT USE | No | Frame Manufacturer | Not Active in BC | nan | No |  
+| d. Add a new supplier | IT07845320991 | 114877 | IT | Italy | ASTRA SRL | No | Frame Manufacturer | Not Active in BC | nan | No |  
+
+**Expected result:** update the supplier library as detailed above.  
+
+**Notes and/or comments:**  
+The suppliers *Lumina s.p.a.* and *Astra spa* have both been acquired by third parties. As a result, their company names and VAT numbers have changed respectively to *LUMINA SRL / IT05876230411* and *ASTRA SRL / IT07845320991*.  
+
+We therefore had to create new master data records in SAP for *LUMINA SRL* and *ASTRA SRL*, and disable the previous codes for *Lumina s.p.a.* and *Astra spa*.  
 """
 
-
-def dump(x):
-    print(json.dumps(x, indent=4, ensure_ascii=False))
+task_685 = {
+    "number": 685,
+    "title": "Update backend library Supplier",
+    "body": """
+Can you please add to the \u201cSupplier\u201d Library in all
+  PROD/PREPROD env the supplier listed in the table below?\nDue date is the
+  end of this week\n\nSupplier VAT Number / Registration Number | SAP Supplier
+  Code | Supplier Country | Supplier Name | Semi Finished Supplier | Supplier
+  Type Code | Catalogue Uploaded By | Note\n-- | -- | -- | -- | -- | -- | -- | --
+  \n9144190007789468XY | \u00a0 | CN | Dongguan Shangpin Glass Products Co.,
+  LTD | Yes | Component/Raw Material Supplier | None |
+  \u00a0\n913502006120103000 | \u00a0 | CN | Xiamen Torch Special Metal
+  Material Co., LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n91440300MA5GLJP574 | \u00a0 | CN | Shenzhen Yushengxin Metal
+  Material Co., LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n913303042544926000 | \u00a0 | CN | Wenzhou Hengdeli Metal Materials
+  Co., LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n91440300MA5DPCFN0N | \u00a0 | CN | Shenzhen Pinxiang Yulong
+  Precision Screw Co., LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n91441900MA53B6PA6K | \u00a0 | CN | Dongguan Changsheng New Material
+  Co., LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n91440101MA59R4J03R | \u00a0 | CN | Guangzhou Lerun Composite
+  Material Technology Co., LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n91440300MA5FA5CG5W | \u00a0 | CN | Shenzhen Xinhe Xing Glass Co.,
+  LTD | No | Component/Raw Material Supplier | None |
+  \u00a0\n91441900MA4UHFRN5F | \u00a0 | CN | Dongguan Langfeng Glass Products
+  Co., LTD | Yes | Component/Raw Material Supplier | None |
+  \u00a0\n91440300359106426U | \u00a0 | CN | Shenzhen Jinaike Metal Material
+  Technology Co., Ltd | Yes | Component/Raw Material Supplier | None |
+  \u00a0\n91330302MA2AT8PM91 | \u00a0 | CN | Wenzhou Hengli Glasses Co., LTD |
+  Yes | Component/Raw Material Supplier | None | \u00a0\n91440300MA5FLEAQ9L |
+  \u00a0 | CN | Shenzhen Xingjing Feng Glass Co., LTD | Yes | Component/Raw
+  Material Supplier | None | \u00a0\n91331021692399736W | \u00a0 | CN | Yuhuan
+  Lula Glasses Co., LTD | Yes | Component/Raw Material Supplier | None |
+  \u00a0\n91350200751619373G | \u00a0 | CN | Xiamen Jiyou New Material Co.,
+  LTD | Yes | Component/Raw Material Supplier | None |
+  \u00a0\n91310115607368434E | \u00a0 | CN | Toray International Trade (China)
+  Co., Ltd | Yes | Component/Raw Material Supplier | None |
+""",
+}
 
 
 if __name__ == "__main__":
+    logger.info("Starting the application...")
+    issue_num = 679  # 676 # 607
+    #issue = get_issue(issue_num)
+    issue = GithubIssue(**task_685)
     app.invoke(
-        {"user_input": user_input, "status": "other"},
-        config={"callbacks": [logger], "recursion_limit": 30},
+        {"issue": issue, "status": "other"},
+        config={"callbacks": [graphLogger], "recursion_limit": 30},
     )

@@ -1,13 +1,14 @@
 import os
-from langchain_core.tools import tool
+import requests
 import questionary
 import pandas as pd
-from tabulate import tabulate
-import json
-from typing import Optional, Union, List
-import numpy as np
+from typing import Dict, Optional, Protocol, Union, List
+from urllib.parse import urlparse
 
-@tool
+from logger import get_logger
+
+logger = get_logger()
+
 def select_file(start_path="/Users/leonid/Downloads") -> str | None:
     """Select a file from the specified directory. Use this when the user
     mentions an attached file, a file to pick or a spreadsheet to update."""
@@ -31,8 +32,7 @@ def select_file(start_path="/Users/leonid/Downloads") -> str | None:
         return os.path.join(start_path, file_name)
     return None
 
-@tool
-def read_excel(file_path: str, sheet: Optional[Union[int, str]] = 0) -> List[dict]:
+def read_excel(file_path: str, sheet: Optional[Union[int, str]] = 0) -> List[Dict[str, str]]:
     """
     Convert an Excel file to a list of dictionaries.
 
@@ -51,3 +51,24 @@ def read_excel(file_path: str, sheet: Optional[Union[int, str]] = 0) -> List[dic
     data_list = df.to_dict(orient='records')
 
     return data_list
+
+class DownloadFile(Protocol):
+    def __call__(self, url: str, dest: Optional[str] = None) -> str:
+        ...
+
+def download_file(url, dest=None) -> str:
+    # if dest and os.path.exists(dest):
+    #     logger.info(f"File {dest} already exists, skipping download.")
+    #     return dest
+    cookie_str = os.getenv("GITHUB_COOKIE", "")
+    cookies = dict(item.split("=", 1) for item in cookie_str.split("; "))
+    if dest is None:
+        dest = os.path.basename(urlparse(url).path) or "download.bin"
+
+    response = requests.get(url, cookies=cookies, stream=True)
+    response.raise_for_status()
+    with open(dest, "wb") as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+
+    return dest
