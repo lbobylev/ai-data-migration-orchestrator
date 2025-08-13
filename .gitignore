@@ -1,2 +1,6 @@
 .aider*
 __pycache__/
+.env
+issues.json
+Plastics.mapping.xlsx
+secrets.yaml

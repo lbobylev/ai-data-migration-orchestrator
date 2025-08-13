@@ -1,370 +1,473 @@
-from langgraph.graph import StateGraph, START, END
+from typing import Any, Literal, Optional
+from uuid import UUID
+from dotenv import load_dotenv
+from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
+from langchain_core.tools import tool
+from langgraph.graph import END, START, StateGraph, MessagesState
+from langgraph.prebuilt import ToolNode, tools_condition
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.patch_stdout import patch_stdout
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.messages import (
-    SystemMessage,
-    HumanMessage,
-)
-from tools.bot import bot
-from tools.file_utils import select_file, read_excel
-from logger import ToolLogger
-from typing import Literal, TypedDict
 import json
-from pydantic import BaseModel, Field, ValidationError
+from datetime import datetime
 
-logger = ToolLogger()
-tools = [bot, select_file, read_excel]
-fast_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
-smart_llm = ChatOpenAI(model="gpt-4o", temperature=0.0)
+from bc.kube_utils import (
+    NAMESPACES_BY_ENV,
+    Namespace,
+    PortForwardHandle,
+    find_pod_name_fuzzy,
+    get_logs,
+    start_port_forwarding,
+    stop_port_forwarding,
+)
+from github_utils import get_issue
 
-Status = Literal[
-    "data_migration_detected",
-    "task_classification_failed",
-    "base_material_update_detected",
-    "data_migration_classification_failed",
-    "base_material_material_patch_detected",
-    "base_material_patch_classification_failed",
-    "base_material_patch_creation_failed",
-    "file_selected",
-    "schema_validation_passed",
-    "file_selection_failed",
-    "other",
-]
+from app_types import (
+    Environment,
+    GithubIssue,
+    MyState,
+)
+from confirm import set_confirm_disable
+from logger import AppLogger, get_logger
+from nodes.asset_type_detection_node import asset_type_detection_node
+from nodes.bug_classification_node import bug_classification_node
+from nodes.data_extraction_node import data_extraction_node
+from nodes.data_source_detection_node import data_source_detection_node
+from nodes.delete_notifications_node import delete_notifications_node
+from nodes.environment_detection_node import environment_detction_node
+from nodes.file_download_node import file_download_node
+from nodes.operation_detection_node import operation_detection_node
+from nodes.patch_extraction_node import patch_extraction_node
+from nodes.task_classification_node import task_classification_node
+from nodes.task_execution_node import task_execution_node
+from nodes.user_input_processing_node import user_input_processing_node
+from nodes.supplier_library_entry_deprecation_node import (
+    supplier_library_entry_deprecation_node,
+)
+from nodes.supplier_library_entry_operation_detection_node import (
+    supplier_library_entry_operation_detection_node,
+)
+from nodes.eyewear_manufacturer_assignment_operation_detection_node import (
+    eyewear_manufacturer_assignment_operation_detection_node,
+)
+from nodes.supplier_library_entry_creation_node import (
+    supplier_library_entry_creation_node,
+)
+from nodes.delete_organization_by_id_node import delete_organization_by_id_node
+from nodes.task_creation_node import task_creation_node
+from tasks import tasks
 
+load_dotenv()
+app_logger = AppLogger()
+logger = get_logger(__name__)
 
-class LibraryEntry(BaseModel):
-    key: str = Field(
-        description="The key of the library entry, which is the unique identifier."
-    )
-
-
-class BaseMaterialPredicate(BaseModel):
-    organizationId: str = Field(description="The organization ID")
-    vendorCode: str = Field(
-        description="The base material vendor code, which is the key of the base material."
-    )
-
-
-class BaseMaterialPatch(BaseModel):
-    predicate: BaseMaterialPredicate = Field(
-        description="The predicate for the base material update."
-    )
-    material: LibraryEntry = Field(
-        description="The base material key, which is the key of the base material."
-    )
-
-
-class MyState(TypedDict):
-    user_prompt: str
-    user_input: str
-    status: Status
-    task_data: dict | None
-
-
-def user_input_processing_node(state: MyState) -> MyState:
-    system_prompt = """
-    You should process the user input and return it as a string.
-    The user input should be prepaged for futher classification.
-    You should remove any unnecessary information, such as greetings, and focus on the main request.
-    You should fix grammatical errors and typos, but do not change the meaning of the request.
-    You shoudl make it as much concise as possible, but still keep the main request intact.
-    """
-    response = fast_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_input"]),
-        ]
-    )
-
-    return {
-        **state,
-        "user_prompt": str(response.content),
-        "user_input": state["user_input"],
-    }
-
-
-def task_classification_node(state: MyState) -> MyState:
-    system_prompt = """
-    You are an analyst. Classify the user's request.
-If the request is about:
-    - changing a mapping
-    - mentions an attached file
-    - involves updating data
-    - mentions fields or columns in a file to be updated
-classify it as "data_migration_detected". 
-Otherwise, classify it as "other".
-Return exactly one of: "data_migration_detected", "other".
-    """
-    response = fast_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_prompt"]),
-        ]
-    )
-    status = str(response.content).strip().lower()
-    match status:
-        case "data_migration_detected":
-            print("Data migration detected, proceeding to classification.")
-            return {**state, "status": "data_migration_detected"}
-        case _:
-            print("Task classification failed, stopping processing.")
-            return {**state, "status": "task_classification_failed"}
-
-
-def data_migration_classification_node(state: MyState) -> MyState:
-    system_prompt = """
-    You are an analyst. Classify the data migration request.
-Classify the request. If it involves changing, replacing, remapping, or updating base naterials (e.g., replacing old base material keys with new ones, mapping one set of base materials to another, or updating components based on such changes), output exactly: base_material_update_detected. Otherwise output exactly: other. You must respond "other" or "base_material_update_detected".
-"""
-    response = smart_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_prompt"]),
-        ]
-    )
-    response_content = str(response.content).strip().lower()
-    match response_content:
-        case "base_material_update_detected":
-            print("Base material update detected, proceeding to file selection.")
-            return {**state, "status": "base_material_update_detected"}
-        case _:
-            print("Data migration classification failed, stopping processing.")
-            return {**state, "status": "data_migration_classification_failed"}
-
-
-def file_selection_node(state: MyState) -> MyState:
-    file_path = select_file.invoke({})
-    if not file_path:
-        print("No file selected, stopping processing.")
-        return {**state, "status": "file_selection_failed"}
-    task_data = state.get("task_data") or {}
-    return {
-        **state,
-        "status": "file_selected",
-        "task_data": {**task_data, "file_path": file_path},
-    }
-
-
-def schema_validation_node(state: MyState) -> MyState:
-    return {**state, "status": "schema_validation_passed"}
-
-
-def base_material_update_node(state: MyState) -> MyState:
-    predicate_prompt = """
-You are given a JSON object containing vendor and material information. Your task is to extract and return a simplified JSON object in the following format:  
-{
-  "organizationId": "<Vendor Code value>",
-  "vendorCode": "<Base Material Vendor Code value>"
-}
-
-Rules:  
-1. Keys in the input JSON may vary in naming. Treat any of the following as possible vendor keys:  
-   "Vendor Code", "vendor_code", "vendor", "organization", "vendorName", "vendor_id", "org".  
-   Treat any of the following as possible base material vendor code keys:  
-   "Base Material Vendor Code", "base_material_vendor_code", "materialVendor", "material_vendor_code", "material_vendor".  
-
-2. organizationId should be determined from the vendor value in the input (case-insensitive).  
-   - Use the organization list below for context. If the value matches (exact match ignoring case) one of these organizations, keep it as-is.  
-   - If it doesn’t match, still return it as-is.  
-
-3. vendorCode should be determined from the base material vendor code value in the input, regardless of exact key name.  
-
-4. Output must be a valid JSON object containing only organizationId and vendorCode.  
-   - No explanations, no extra keys, no code blocks.  
-
-Example:  
-Input:  
-{
-    "vendor": "Barberini",
-    "material_vendor_code": "PA",
-    "otherData": "ignore"
-}  
-
-Output:  
-{
-    "organizationId": "barberini",
-    "vendorCode": "PA"
-}  
-"""
-
-    task_data = state.get("task_data") or {}
-
-    return {**state, "task_data": {**task_data, "predicate_prompt": predicate_prompt}}
-
-
-def base_material_patch_classification_node(state: MyState) -> MyState:
-    system_prompt = """
-You are a classifier that determines the type of request based on user input.  
-If the request explicitly mentions "KEYE key" in relation to a base material (e.g., OLD Base Material KEYE Key, NEW Base Material KEYE Key, or similar), return exactly:
-base_material_material_patch_detected
-Otherwise, return exactly:
-other
-Return strictly one of these two lines.
-"""
-    response = smart_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=state["user_prompt"]),
-        ]
-    )
-    response_content = str(response.content).strip().lower()
-    match response_content:
-        case "base_material_material_patch_detected":
-            return {**state, "status": "base_material_material_patch_detected"}
-        case _:
-            print("Base material patch classification failed, stopping processing.")
-            return {**state, "status": "base_material_patch_classification_failed"}
-
-
-def base_material_patch_node(state: MyState) -> MyState:
-    task_data = state.get("task_data") or {}
-    predicate_prompt = task_data.get("predicate_prompt")
-    if not predicate_prompt:
-        print("No predicate prompt found, stopping processing.")
-        return {**state, "status": "other"}
-    status = state.get("status")
-    match status:
-        case "base_material_material_patch_detected":
-            file_path = task_data.get("file_path")
-            rows = read_excel.invoke({"file_path": file_path})
-            for row in rows:
-                create_base_material_material_patch(predicate_prompt, row)
-
-            return {**state, "status": "other"}
-        case _:
-            print("Base material patch creation failed, stopping processing.")
-            return {**state, "status": "base_material_patch_creation_failed"}
-
-
-def create_base_material_material_patch(predicate_prompt: str, row: dict) -> None:
-    system_prompt = (
-        """
-You will receive two separate system prompts:
-Predicate Prompt – This instructs you how to create a predicate.
-Material Key Prompt – This instructs you how to extract the base material key from a JSON object.
-Perform both actions exactly as each system prompt describes.
-Use the Predicate Prompt to produce a string output (the predicate result).
-Use the Material Key Prompt to find the required base material key in the provided JSON and return its value (the base material key result).
-Finally, return your results in one JSON object with the following structure:
-{
-  "predicate": "<predicate result>",
-  "material": {
-    "key": "<base material key result>"
-  }
-"""
-        f"""
-Predicate prompt:
-{predicate_prompt}"""
-        """
-Material key prompt:
-Given a JSON object, find the value of the key whose name contains all of the following words (case-insensitive): 
-"new", "keye", "key", and "base material". 
-If multiple keys match, return the first match. 
-If no key matches, return null.
-
-Example input:
-{
-    "Vendor Code": "barberini",
-    "Base Material Vendor Code": "PA",
-    "Base Material Vendor Description": "Nylon",
-    "Material Family Code": "PLA",
-    "Material Family Description": "Plastic",
-    "Base Material Certification Uploaded": "No",
-    "OLD Base Material KEYE Key": "Plastic - nylon - conventional",
-    "Mandatory Certification Type Code 1": NaN,
-    "Mandatory Certification Type Description 1": NaN,
-    "Validation": "ACCEPTED",
-    "NEW Base Material KEYE Key": "Plastic - nylon - conventional - Grilamid TR XE 3805"
-}
-Expected output:
-"Plastic - nylon - conventional - Grilamid TR XE 3805"
-"""
-    )
-
-    struct_llm = smart_llm.with_structured_output(BaseMaterialPatch, method="json_mode")
-    patch = struct_llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=json.dumps(row, ensure_ascii=False)),
-        ]
-    )
-
-    print(patch)
+set_confirm_disable(True)
 
 
 def route_by_status(state: MyState) -> str:
     match state.get("status"):
         case "data_migration_detected":
-            return "data_migration_classification_node"
-        case "base_material_update_detected":
-            return "file_selection_node"
-        case "file_selected":
-            return "schema_validation_node"
-        case "schema_validation_passed":
-            return "base_material_update_node"
-        case "base_material_material_patch_detected":
-            return "base_material_patch_node"
+            return "asset_type_detection_node"
+        case "bug_detected":
+            return "bug_classification_node"
+        case "delete_notifications_detected":
+            return "environment_detection_node"
+        case "delete_organization_by_id_detected":
+            return "environment_detection_node"
+        case "data_migration_classified":
+            return "operation_detection_node"
+        case "operation_detected":
+            return "operation_plan_init_node"
 
-    print("Task is not recognized, routing to END.")
+    logger.error("Task is not recognized, routing to END.")
     return END
 
 
+def route_by_data_source(state: MyState) -> str:
+    data_source = state.get("data_source")
+    if data_source == "attachment_file":
+        return "file_download_node"
+    elif data_source == "user_request":
+        return "data_extraction_node"
+    return END
+
+
+def route_after_data_extraction(state: MyState) -> str:
+    status = state.get("status")
+    if status == "no_tabular_data_found":
+        return "operation_detection_node"
+
+    asset_type = state.get("asset_type")
+    match asset_type:
+        case "SupplierLibraryEntry":
+            return "supplier_library_entry_operation_detection_node"
+        case "EyewearManufacturerAssignment":
+            return "eyewear_manufacturer_assignment_operation_detection_node"
+        case _:
+            return "operation_detection_node"
+
+
 graph = StateGraph(MyState)
+graph.add_node("bug_classification_node", bug_classification_node)
+graph.add_node("delete_notifications_node", delete_notifications_node)
+graph.add_edge("delete_notifications_node", END)
+graph.add_edge("bug_classification_node", END)
+
+graph.add_node("delete_organization_by_id_node", delete_organization_by_id_node)
 graph.add_node("user_input_processing_node", user_input_processing_node)
 graph.add_node("task_classification_node", task_classification_node)
-graph.add_node("data_migration_classification_node", data_migration_classification_node)
-graph.add_node("base_material_update_node", base_material_update_node)
-graph.add_node("file_selection_node", file_selection_node)
-graph.add_node("schema_validation_node", schema_validation_node)
+graph.add_node("asset_type_detection_node", asset_type_detection_node)
+graph.add_node("environment_detection_node", environment_detction_node)
+graph.add_node("data_source_detection_node", data_source_detection_node)
+graph.add_node("file_download_node", file_download_node)
+graph.add_node("data_extraction_node", data_extraction_node)
+graph.add_node("operation_detection_node", operation_detection_node)
+graph.add_node("patch_extraction_node", patch_extraction_node)
 graph.add_node(
-    "base_material_patch_classification_node", base_material_patch_classification_node
+    "supplier_library_entry_operation_detection_node",
+    supplier_library_entry_operation_detection_node,
 )
-graph.add_node("base_material_patch_node", base_material_patch_node)
+graph.add_node(
+    "eyewear_manufacturer_assignment_operation_detection_node",
+    eyewear_manufacturer_assignment_operation_detection_node,
+)
+graph.add_node(
+    "supplier_library_entry_deprecation_node",
+    supplier_library_entry_deprecation_node,
+)
+graph.add_node("task_creation_node", task_creation_node)
+graph.add_node("task_execution_node", task_execution_node)
+graph.add_node(
+    "supplier_library_entry_creation_node", supplier_library_entry_creation_node
+)
+
 graph.add_edge(START, "user_input_processing_node")
 graph.add_edge("user_input_processing_node", "task_classification_node")
+
 graph.add_conditional_edges(
     "task_classification_node",
     route_by_status,
-    ["data_migration_classification_node", END],
+    [
+        "asset_type_detection_node",
+        "environment_detection_node",
+        "bug_classification_node",
+        END,
+    ],
+)
+
+graph.add_edge("asset_type_detection_node", "environment_detection_node")
+graph.add_conditional_edges(
+    "environment_detection_node",
+    lambda s: (
+        "data_source_detection_node"
+        if s.get("task_type") == "data_migration"
+        else (
+            "delete_notifications_node"
+            if s.get("task_type") == "delete_notifications"
+            else END
+        )
+    ),
+    [
+        "delete_notifications_node",
+        "delete_organization_by_id_node",
+        "data_source_detection_node",
+        END,
+    ],
 )
 graph.add_conditional_edges(
-    "data_migration_classification_node",
-    route_by_status,
-    ["file_selection_node", END],
+    "data_source_detection_node",
+    route_by_data_source,
+    ["file_download_node", "data_extraction_node", END],
 )
 graph.add_conditional_edges(
-    "file_selection_node",
-    route_by_status,
-    ["schema_validation_node", END],
+    "file_download_node",
+    route_after_data_extraction,
+    [
+        "operation_detection_node",
+        "supplier_library_entry_operation_detection_node",
+        "eyewear_manufacturer_assignment_operation_detection_node",
+    ],
 )
 graph.add_conditional_edges(
-    "schema_validation_node",
-    route_by_status,
-    ["base_material_update_node", END],
+    "data_extraction_node",
+    route_after_data_extraction,
+    [
+        "operation_detection_node",
+        "supplier_library_entry_operation_detection_node",
+        "eyewear_manufacturer_assignment_operation_detection_node",
+    ],
 )
-graph.add_edge("base_material_update_node", "base_material_patch_classification_node")
 graph.add_conditional_edges(
-    "base_material_patch_classification_node",
-    route_by_status,
-    ["base_material_patch_node", END],
+    "supplier_library_entry_operation_detection_node",
+    lambda s: (
+        "supplier_library_entry_deprecation_node"
+        if s.get("detected_operation") == "deprecation"
+        else (
+            "supplier_library_entry_creation_node"
+            if s.get("detected_operation") == "create"
+            else "task_creation_node"
+        )
+    ),
+    [
+        "task_creation_node",
+        "supplier_library_entry_deprecation_node",
+        "supplier_library_entry_creation_node",
+    ],
 )
-graph.add_edge("base_material_patch_node", END)
+graph.add_edge("task_creation_node", "task_execution_node")
+graph.add_edge(
+    "eyewear_manufacturer_assignment_operation_detection_node",
+    "task_execution_node",
+)
+graph.add_edge("task_execution_node", END)
+graph.add_edge("supplier_library_entry_deprecation_node", END)
+graph.add_edge("supplier_library_entry_creation_node", END)
+graph.add_edge("patch_extraction_node", END)
+
 app = graph.compile()
 
-user_input = """
-We’d need to change the mapping of the base materials listed in the attached file.
 
-Expected result: substitute the “OLD Base Material KEYE Key” (column G in the attached file) with “NEW Base Material KEYE Key” (column K in the attached file).
-We expect that all components that have one or more of the base materials mentioned in the attached file will be consequently updated.
-"""
+def issue_to_str(issue: GithubIssue) -> str:
+    n = issue.get("number") or 0
+    title = issue.get("title") or ""
+    body = issue.get("body") or ""
+    return f"""Number: {n}\nTitle: {title}\nBody: {body}"""
 
 
-def dump(x):
-    print(json.dumps(x, indent=4, ensure_ascii=False))
+def fetch_issue_from_github(issue_num: int) -> str:
+    """
+    Fetches issue details from GitHub or a predefined task list based on the issue number.
+    """
+    if str(issue_num) in tasks:
+        return tasks[str(issue_num)]
+    issue = get_issue(issue_num)
+    return issue_to_str(issue)
+
+
+@tool
+def process_github_issue(issue_number: int) -> str:
+    """
+    Processes the issue text through the state graph application.
+    """
+    issue_text = fetch_issue_from_github(issue_number)
+    app_invoke(
+        {"user_input": issue_text},
+    )
+    return "done"
+
+
+@tool
+def process_text(user_input: str) -> str:
+    """
+    Processes the user input text through the state graph application.
+    """
+    app_invoke(
+        {"user_input": user_input},
+    )
+    return "done"
+
+
+@tool
+def show_logs(
+    fuzzy_pod_name: str,
+    env: Environment,
+    ns: Namespace,
+    *,
+    since_time: Optional[str],  # ISO format string
+) -> str:
+    """
+    Fetch and display logs from a specified pod in the given environment.
+    The pod name can be a fuzzy match. It is not necessary to provide the full pod name.
+    """
+    try:
+        pod_name = find_pod_name_fuzzy(fuzzy_pod_name, env, ns)
+        logger.debug(f"Found pod name: {pod_name}")
+    except Exception as e:
+        logger.error(f"Error finding pod name: {e}")
+        pod_name = None
+    if pod_name:
+        try:
+            logger.debug(f"Fetching logs for pod '{pod_name}' in {env}/{ns}")
+            logs = get_logs(pod_name, env, ns, since_time=since_time)
+            print(logs)
+        except Exception as e:
+            logger.error(f"Error fetching logs: {e}")
+    return "done"
+
+
+@tool
+def get_time() -> str:
+    """
+    Returns the current date and time.
+    """
+    return datetime.now().isoformat()
+
+
+handle: Optional[PortForwardHandle] = None
+
+
+@tool
+def start_bcrest_port_forwarding(env: Environment, ns: Namespace) -> str:
+    """
+    Starts port forwarding for the bcrest api.
+    """
+    global handle
+    if handle is None:
+        handle = start_port_forwarding(env, namespace=ns)
+        return f"Port forwarding started for {env}."
+    else:
+        return "Port forwarding is already running."
+
+
+@tool
+def stop_bcrest_port_forwarding():
+    """
+    Stops port forwarding for the bcrest api.
+    """
+    global handle
+    if handle is not None:
+        env = handle.env
+        ns = handle.ns
+        stop_port_forwarding(handle)
+        handle = None
+        return f"Port forwarding stopped for {env}/{ns}."
+    else:
+        return "Port forwarding is not running."
+
+
+TOOLS = [
+    process_github_issue,
+    process_text,
+    show_logs,
+    get_time,
+    start_bcrest_port_forwarding,
+    stop_bcrest_port_forwarding,
+]
+
+
+llm_with_tools = ChatOpenAI(model="gpt-5-mini", temperature=0, top_p=1).bind_tools(
+    TOOLS
+)
+
+
+def agent(state: MessagesState):
+    messages = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """
+You can be asked to perform kubernetes operations in different namespaces and evironments. 
+You know the following environments and their corresponding namespaces:
+{envs}
+When use tools pass the correct environment and namespace parameters from the above list.
+You must choose the most appropriate namespace or environment from the above list.
+If the namespace is not provided, you must choose the most appropriate namespace from the above list.
+If time period is specified, like "last 10 minutes", "last hour", "today", "yesterday", "last 2 days", "last week", you must calculate the since_time and to_time parameters based on the current time.
+You can get the current time by using the get_time tool.
+There is 2 hours time difference between my local time (CEST) and the kube cluster.
+For example if it is 3pm CEST, it is 1pm in the kube cluster.
+You must minus 2 hours from the current time to get the kube cluster time.
+If time is not sepcified, you can leave the since_time parameter empty.
+""",
+            ),
+        ]
+    ).format_messages(envs=json.dumps(NAMESPACES_BY_ENV, indent=2))
+    response = llm_with_tools.invoke([*messages, *state["messages"]])
+    return {"messages": [response]}
+
+
+class BotLogger(BaseCallbackHandler):
+    def on_tool_start(
+        self,
+        serialized: dict[str, Any],
+        input_str: str,
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        tags: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+        inputs: Optional[dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> Any:
+        if len(input_str) > 2:
+            input_str = input_str[:200] + "..."
+            print(f"[TOOL START] {serialized['name']} with input:\n{input_str}\n")
+        else:
+            input_str = ""
+            print(f"[TOOL START] {serialized['name']} with no input.\n")
+
+    def on_tool_end(
+        self,
+        output: str,
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        tags: Optional[list[str]] = None,
+        **kwargs: Any,
+    ) -> Any:
+        print(f"[TOOL END]")  # Output:\n{output[:300]}...\n")
+
+
+def app_invoke(payload, config=None):
+    return app.invoke(
+        payload,
+        config=(
+            {"callbacks": [BotLogger()], "recursion_limit": 30}
+            if config is None
+            else config
+        ),
+    )
+
+
+bot_graph = StateGraph(MessagesState)
+bot_graph.add_node("agent", agent)
+bot_graph.add_node("tools", ToolNode(TOOLS))
+bot_graph.add_edge(START, "agent")
+bot_graph.add_conditional_edges("agent", tools_condition, {"tools": "tools", END: END})
+bot_graph.add_edge("tools", "agent")
+bot = bot_graph.compile()
+
+
+session = PromptSession(
+    history=FileHistory(".bot_history"),
+)
 
 
 if __name__ == "__main__":
-    app.invoke(
-        {"user_input": user_input, "status": "other"},
-        config={"callbacks": [logger], "recursion_limit": 30},
-    )
+    print("Surge Agent is ready to assist you. (Type 'exit' to quit)")
+    while True:
+        try:
+            # Prevent background prints (logs/streaming) from garbling the cursor line
+            with patch_stdout():
+                user = session.prompt(
+                    "You: ",
+                    auto_suggest=AutoSuggestFromHistory(),
+                ).strip()
+            if not user:
+                continue
+            if user.lower() in {"exit", "quit"}:
+                raise KeyboardInterrupt
+            events = bot.stream(
+                {"messages": [HumanMessage(content=user)]},
+                stream_mode="values",
+                config={"callbacks": [BotLogger()], "recursion_limit": 30},
+            )
+            last_ai: Optional[AIMessage] = None
+            for ev in events:
+                # ev is {"messages": [<Message>]} updates from agent/tools
+                for m in ev["messages"] or []:
+                    if isinstance(m, AIMessage):
+                        text = str(m.content)
+                        if len(text.strip()) == 0:
+                            continue
+                        last_ai = m
+                        print(
+                            f"Agent: {last_ai.content if last_ai else '(no response)'}",
+                        )
+        except KeyboardInterrupt:
+            print("Exiting Surge Agent. Goodbye!")
+            break
