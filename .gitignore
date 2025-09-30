@@ -4,3 +4,4 @@ __pycache__/
 issues.json
 Plastics.mapping.xlsx
 secrets.yaml
+.bot_history
